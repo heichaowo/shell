@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# install iptables-persistent
+apt install iptables-persistent
+
 # Flush existing rules and set default policies
 iptables -F
 iptables -X

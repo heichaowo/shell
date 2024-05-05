@@ -15,3 +15,4 @@ wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shel
 bash <(curl -fsSL https://raw.githubusercontent.com/heichaowo/shell/main/miner.sh/)
 
 wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/swap.sh" && sudo chmod +x swap.sh && sudo ./swap.sh
+swap.sh 后面可以加上1g,或是需要的swap大小

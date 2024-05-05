@@ -1,7 +1,14 @@
 #!/bin/bash
 
-# 提示用户输入swap大小和单位
-read -p "Enter the size of the swap file (e.g., 4G or 512M): " swap_size
+# 检查是否提供了命令行参数
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <size>"
+  echo "Example: $0 1G"
+  exit 1
+fi
+
+# 获取命令行参数作为swap大小
+swap_size=$1
 
 # 确定swap文件的位置
 swap_file="/swapfile"

@@ -13,3 +13,5 @@ wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shel
 wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/iptables/iptables/iptables.sh" && sudo chmod +x iptables.sh && sudo ./iptables.sh
 
 bash <(curl -fsSL https://raw.githubusercontent.com/heichaowo/shell/main/miner.sh/)
+
+wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/swap.sh" && sudo chmod +x swap.sh && sudo ./swap.sh

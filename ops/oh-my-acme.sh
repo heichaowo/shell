@@ -11,8 +11,9 @@ WEBROOT="/var/www/html"
 KEY_DIR="/etc/ssl/$DOMAIN"
 ACME_PATH="$HOME/.acme.sh"
 
-# 选择使用的端口，默认为80，如果需要自定义端口，修改此值
-CUSTOM_PORT=8080
+# 提示输入自定义端口，默认为80
+read -p "请输入要使用的端口 (默认: 80): " CUSTOM_PORT
+CUSTOM_PORT=${CUSTOM_PORT:-80}
 
 # 显示选项菜单
 echo "选择要使用的CA (证书颁发机构):"

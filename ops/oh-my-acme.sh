@@ -42,14 +42,14 @@ case $CA_OPTION in
         ;;
 esac
 
-# 选择使用的模式
+# 选择使用的模式，默认webroot模式
 echo "选择要使用的模式:"
 echo "1) standalone 模式"
-echo "2) webroot 模式"
-read -p "请输入选项 [1-2] (默认: 1): " MODE_OPTION
+echo "2) webroot 模式 (默认)"
+read -p "请输入选项 [1-2] (默认: 2): " MODE_OPTION
 
-# 如果用户直接回车，则使用standalone模式
-MODE_OPTION=${MODE_OPTION:-1}
+# 如果用户直接回车，则使用webroot模式
+MODE_OPTION=${MODE_OPTION:-2}
 
 # 检查并安装acme.sh和socat
 if [ ! -f "$ACME_PATH/acme.sh" ]; then
@@ -85,8 +85,8 @@ if [ "$MODE_OPTION" = "1" ]; then
         echo "已删除iptables规则，关闭端口 $CUSTOM_PORT"
     fi
 
-# 使用webroot模式申请SSL证书
-elif [ "$MODE_OPTION" = "2" ];then
+# 使用webroot模式申请SSL证书（默认）
+elif [ "$MODE_OPTION" = "2" ]; then
     $ACME_PATH/acme.sh --issue -d $DOMAIN -w $WEBROOT -k ec-256 --force --insecure --server $CA_SERVER
 else
     echo "无效的选项。请选择1或2。"
@@ -94,7 +94,7 @@ else
 fi
 
 # 创建目标目录（如果不存在）
-if [ ! -d "$KEY_DIR" ];then
+if [ ! -d "$KEY_DIR" ]; then
     mkdir -p $KEY_DIR
     echo "已创建目录: $KEY_DIR"
 fi

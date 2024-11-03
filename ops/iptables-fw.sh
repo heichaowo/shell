@@ -1,14 +1,14 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
-#	Description: iptables Port forwarding with MASQUERADE
-#	Version: 0.0.2
-#	Author: heichaowo
+#	Description: iptables Port forwarding
+#	Version: 0.0.1
+#	Author: Yanglc
 #=================================================
-sh_ver="0.0.2"
+sh_ver="0.0.1"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -26,6 +26,8 @@ check_sys(){
 		release="debian"
 	elif cat /etc/issue | grep -q -E -i "ubuntu"; then
 		release="ubuntu"
+	elif cat /etc/issue | grep -q -E -i "centos|red hat|redhat"; then
+		release="centos"
 	elif cat /proc/version | grep -q -E -i "debian"; then
 		release="debian"
 	elif cat /proc/version | grep -q -E -i "ubuntu"; then
@@ -33,6 +35,7 @@ check_sys(){
 	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
 		release="centos"
     fi
+	#bit=`uname -m`
 }
 install_iptables(){
 	iptables_exist=$(iptables -V)
@@ -42,7 +45,7 @@ install_iptables(){
 		echo -e "${Info} 检测到未安装 iptables，开始安装..."
 		if [[ ${release}  == "centos" ]]; then
 			yum update
-			yum install -y iptables iptables-services
+			yum install -y iptables
 		else
 			apt-get update
 			apt-get install -y iptables
@@ -64,36 +67,9 @@ Set_forwarding_port(){
 	echo && echo -e "	欲转发端口 : ${Red_font_prefix}${forwarding_port}${Font_color_suffix}" && echo
 }
 Set_forwarding_ip(){
-	read -e -p "请输入 iptables 欲转发至的 远程IP(被转发服务器):" forwarding_ip
-	[[ -z "${forwarding_ip}" ]] && echo "取消..." && exit 1
-	echo && echo -e "	欲转发服务器IP : ${Red_font_prefix}${forwarding_ip}${Font_color_suffix}" && echo
-	if [[ ${forwarding_ip} =~ ":" ]]; then
-		ipv6=1
-	else
-		ipv6=0
-	fi
-	if [[ ${ipv6} -eq 1 ]]; then
-		install_ip6tables
-	fi
-}
-install_ip6tables(){
-	ip6tables_exist=$(ip6tables -V)
-	if [[ ${ip6tables_exist} != "" ]]; then
-		echo -e "${Info} 已经安装ip6tables，继续..."
-	else
-		echo -e "${Info} 检测到未安装 ip6tables，开始安装..."
-		if [[ ${release}  == "centos" ]]; then
-			yum install -y ip6tables
-		else
-			apt-get install -y ip6tables
-		fi
-		ip6tables_exist=$(ip6tables -V)
-		if [[ ${ip6tables_exist} = "" ]]; then
-			echo -e "${Error} 安装ip6tables失败，请检查 !" && exit 1
-		else
-			echo -e "${Info} ip6tables 安装完成 !"
-		fi
-	fi
+		read -e -p "请输入 iptables 欲转发至的 远程IP(被转发服务器):" forwarding_ip
+		[[ -z "${forwarding_ip}" ]] && echo "取消..." && exit 1
+		echo && echo -e "	欲转发服务器IP : ${Red_font_prefix}${forwarding_ip}${Font_color_suffix}" && echo
 }
 Set_local_port(){
 	echo -e "请输入 iptables 本地监听端口 [1-65535] (支持端口段 如 2333-6666)"
@@ -136,7 +112,14 @@ Set_Config(){
 	Set_local_port
 	Set_local_ip
 	Set_forwarding_type
-	echo && echo -e "——————————————————————————————————————————————————————————————————————"
+	echo && echo -e "——————————————————————————————
+	请检查 iptables 端口转发规则配置是否有误 !\n
+	本地监听端口    : ${Green_font_prefix}${local_port}${Font_color_suffix}
+	服务器 IP\t: ${Green_font_prefix}${local_ip}${Font_color_suffix}\n
+	欲转发的端口    : ${Green_font_prefix}${forwarding_port}${Font_color_suffix}
+	欲转发 IP\t: ${Green_font_prefix}${forwarding_ip}${Font_color_suffix}
+	转发类型\t: ${Green_font_prefix}${forwarding_type}${Font_color_suffix}
+——————————————————————————————\n"
 	read -e -p "请按任意键继续，如有配置错误请使用 Ctrl+C 退出。" var
 }
 Add_forwarding(){
@@ -153,53 +136,96 @@ Add_forwarding(){
 		Add_iptables "udp"
 	fi
 	Save_iptables
-	clear && echo && echo -e "——————————————————————————————————————————————————————————————————————"
-	echo -e "iptables 端口转发规则配置完成 !\n"
-	echo -e "本地监听端口    : ${Green_font_prefix}${local_port}${Font_color_suffix}"
-	echo -e "服务器 IP	: ${Green_font_prefix}${local_ip}${Font_color_suffix}\n"
-	echo -e "欲转发的端口    : ${Green_font_prefix}${forwarding_port_1}${Font_color_suffix}"
-	echo -e "欲转发 IP	: ${Green_font_prefix}${forwarding_ip}${Font_color_suffix}"
-	echo -e "转发类型	: ${Green_font_prefix}${forwarding_type}${Font_color_suffix}"
-	echo -e "——————————————————————————————————————————————————————————————————————\n"
+	clear && echo && echo -e "——————————————————————————————
+	iptables 端口转发规则配置完成 !\n
+	本地监听端口    : ${Green_font_prefix}${local_port}${Font_color_suffix}
+	服务器 IP\t: ${Green_font_prefix}${local_ip}${Font_color_suffix}\n
+	欲转发的端口    : ${Green_font_prefix}${forwarding_port_1}${Font_color_suffix}
+	欲转发 IP\t: ${Green_font_prefix}${forwarding_ip}${Font_color_suffix}
+	转发类型\t: ${Green_font_prefix}${forwarding_type}${Font_color_suffix}
+——————————————————————————————\n"
 }
 View_forwarding(){
 	check_iptables
-	forwarding_text=$(iptables -t nat -vnL PREROUTING | tail -n +3)
+	forwarding_text=$(iptables -t nat -vnL PREROUTING|tail -n +3)
 	[[ -z ${forwarding_text} ]] && echo -e "${Error} 没有发现 iptables 端口转发规则，请检查 !" && exit 1
-	forwarding_total=$(echo -e "${forwarding_text}" | wc -l)
+	forwarding_total=$(echo -e "${forwarding_text}"|wc -l)
 	forwarding_list_all=""
-	for ((integer = 1; integer <= ${forwarding_total}; integer++)); do
-		forwarding_type=$(echo -e "${forwarding_text}" | awk '{print $4}' | sed -n "${integer}p")
-		forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${integer}p" | awk -F "dpt:" '{print $2}')
-		[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${integer}p" | awk -F "dpts:" '{print $2}')
-		forwarding_fork=$(echo -e "${forwarding_text}" | awk '{print $12}' | sed -n "${integer}p" | awk -F "to:" '{print $2}')
-		forwarding_list_all=${forwarding_list_all}"${Green_font_prefix}"${integer}". ${Font_color_suffix} 类型: ${Green_font_prefix}"${forwarding_type}"${Font_color_suffix} 监听端口: ${Red_font_prefix}"${forwarding_listen}"${Font_color_suffix} 转发IP和端口: ${Red_font_prefix}"${forwarding_fork}"${Font_color_suffix}\n"
+	for((integer = 1; integer <= ${forwarding_total}; integer++))
+	do
+		forwarding_type=$(echo -e "${forwarding_text}"|awk '{print $4}'|sed -n "${integer}p")
+		forwarding_listen=$(echo -e "${forwarding_text}"|awk '{print $11}'|sed -n "${integer}p"|awk -F "dpt:" '{print $2}')
+		[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}"| awk '{print $11}'|sed -n "${integer}p"|awk -F "dpts:" '{print $2}')
+		forwarding_fork=$(echo -e "${forwarding_text}"| awk '{print $12}'|sed -n "${integer}p"|awk -F "to:" '{print $2}')
+		forwarding_list_all=${forwarding_list_all}"${Green_font_prefix}"${integer}".${Font_color_suffix} 类型: ${Green_font_prefix}"${forwarding_type}"${Font_color_suffix} 监听端口: ${Red_font_prefix}"${forwarding_listen}"${Font_color_suffix} 转发IP和端口: ${Red_font_prefix}"${forwarding_fork}"${Font_color_suffix}\n"
 	done
 	echo && echo -e "当前有 ${Green_background_prefix} "${forwarding_total}" ${Font_color_suffix} 个 iptables 端口转发规则。"
 	echo -e ${forwarding_list_all}
 }
 Del_forwarding(){
 	check_iptables
-	while true; do
-		View_forwarding
-		read -e -p "请输入数字 来选择要删除的 iptables 端口转发规则(默认回车取消):" Del_forwarding_num
-		[[ -z "${Del_forwarding_num}" ]] && Del_forwarding_num="0"
-		echo $((${Del_forwarding_num}+0)) &>/dev/null
-		if [[ $? -eq 0 ]]; then
-			if [[ ${Del_forwarding_num} -ge 1 ]] && [[ ${Del_forwarding_num} -le ${forwarding_total} ]]; then
-				forwarding_type=$(echo -e "${forwarding_text}" | awk '{print $4}' | sed -n "${Del_forwarding_num}p")
-				forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${Del_forwarding_num}p" | awk -F "dpt:" '{print $2}' | sed 's/-/:/g')
-				[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${Del_forwarding_num}p" | awk -F "dpts:" '{print $2}')
-				Del_iptables "${forwarding_type}" "${Del_forwarding_num}"
-				Save_iptables
-				echo && echo -e "${Info} iptables 端口转发规则删除完成 !" && echo
-			else
-				echo -e "${Error} 请输入正确的数字 !"
-			fi
+	while true
+	do
+	View_forwarding
+	read -e -p "请输入数字 来选择要删除的 iptables 端口转发规则(默认回车取消):" Del_forwarding_num
+	[[ -z "${Del_forwarding_num}" ]] && Del_forwarding_num="0"
+	echo $((${Del_forwarding_num}+0)) &>/dev/null
+	if [[ $? -eq 0 ]]; then
+		if [[ ${Del_forwarding_num} -ge 1 ]] && [[ ${Del_forwarding_num} -le ${forwarding_total} ]]; then
+			forwarding_type=$(echo -e "${forwarding_text}"| awk '{print $4}' | sed -n "${Del_forwarding_num}p")
+			forwarding_listen=$(echo -e "${forwarding_text}"| awk '{print $11}' | sed -n "${Del_forwarding_num}p" | awk -F "dpt:" '{print $2}' | sed 's/-/:/g')
+			[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}"| awk '{print $11}' |sed -n "${Del_forwarding_num}p" | awk -F "dpts:" '{print $2}')
+			Del_iptables "${forwarding_type}" "${Del_forwarding_num}"
+			Save_iptables
+			echo && echo -e "${Info} iptables 端口转发规则删除完成 !" && echo
 		else
-			break && echo "取消..."
+			echo -e "${Error} 请输入正确的数字 !"
 		fi
+	else
+		break && echo "取消..."
+	fi
 	done
+}
+Uninstall_forwarding(){
+	check_iptables
+	echo -e "确定要清空 iptables 所有端口转发规则 ? [y/N]"
+	read -e -p "(默认: n):" unyn
+	[[ -z ${unyn} ]] && unyn="n"
+	if [[ ${unyn} == [Yy] ]]; then
+		forwarding_text=$(iptables -t nat -vnL PREROUTING|tail -n +3)
+		[[ -z ${forwarding_text} ]] && echo -e "${Error} 没有发现 iptables 端口转发规则，请检查 !" && exit 1
+		forwarding_total=$(echo -e "${forwarding_text}"|wc -l)
+		for((integer = 1; integer <= ${forwarding_total}; integer++))
+		do
+			forwarding_type=$(echo -e "${forwarding_text}"|awk '{print $4}'|sed -n "${integer}p")
+			forwarding_listen=$(echo -e "${forwarding_text}"|awk '{print $11}'|sed -n "${integer}p"|awk -F "dpt:" '{print $2}')
+			[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}"| awk '{print $11}'|sed -n "${integer}p"|awk -F "dpts:" '{print $2}')
+			# echo -e "${forwarding_text} ${forwarding_type} ${forwarding_listen}"
+			Del_iptables "${forwarding_type}" "${integer}"
+		done
+		Save_iptables
+		echo && echo -e "${Info} iptables 已清空 所有端口转发规则 !" && echo
+	else
+		echo && echo "清空已取消..." && echo
+	fi
+}
+Add_iptables(){
+	iptables -t nat -A PREROUTING -p "$1" --dport "${local_port}" -j DNAT --to-destination "${forwarding_ip}":"${forwarding_port}"
+	iptables -t nat -A POSTROUTING -p "$1" -d "${forwarding_ip}" --dport "${forwarding_port_1}" -j SNAT --to-source "${local_ip}"
+        iptables -t nat -A POSTROUTING -p "$1" -d "${forwarding_ip}" --dport "${forwarding_port_1}" -j MASQUERADE
+	echo "iptables -t nat -A PREROUTING -p $1 --dport ${local_port} -j DNAT --to-destination ${forwarding_ip}:${forwarding_port}"
+	echo "iptables -t nat -A POSTROUTING -p $1 -d ${forwarding_ip} --dport ${forwarding_port_1} -j SNAT --to-source ${local_ip}"
+        echo "iptables -t nat -A POSTROUTING -p "$1" -d "${forwarding_ip}" --dport "${forwarding_port_1}" -j MASQUERADE" 
+	echo "${local_port}"
+	iptables -I INPUT -m state --state NEW -m "$1" -p "$1" --dport "${local_port}" -j ACCEPT
+        
+}
+Del_iptables(){
+	iptables -t nat -D POSTROUTING "$2"
+	iptables -t nat -D PREROUTING "$2"
+	iptables -D INPUT -m state --state NEW -m "$1" -p "$1" --dport "${forwarding_listen}" -j ACCEPT
+        iptables -t nat -D POSTROUTING -p "$1" -d "${forwarding_ip}" --dport "${forwarding_port_1}" -j MASQUERADE
+
 }
 Save_iptables(){
 	if [[ ${release} == "centos" ]]; then
@@ -221,14 +247,14 @@ Set_iptables(){
 	fi
 }
 Update_Shell(){
-	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/heichaowo/shell/refs/heads/main/ops/iptables-fw.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/"//g'|head -1)
+	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/iptables-pf.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
 	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
-	wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/refs/heads/main/ops/iptables-fw.sh" && chmod +x iptables-fw.sh
+	wget -N --no-check-certificate "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/iptables-pf.sh" && chmod +x iptables-pf.sh
 	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 }
 check_sys
 echo && echo -e " iptables 端口转发一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
-  -- Nya | community.nya.ae --
+  -- Toyo | doub.io/wlzy-20 --
   
  ${Green_font_prefix}0.${Font_color_suffix} 升级脚本
 ————————————
@@ -243,24 +269,24 @@ echo && echo -e " iptables 端口转发一键管理脚本 ${Red_font_prefix}[v${
 read -e -p " 请输入数字 [0-5]:" num
 case "$num" in
 	0)
-		Update_Shell
-		;;
+	Update_Shell
+	;;
 	1)
-		install_iptables
-		;;
+	install_iptables
+	;;
 	2)
-		Uninstall_forwarding
-		;;
+	Uninstall_forwarding
+	;;
 	3)
-		View_forwarding
-		;;
+	View_forwarding
+	;;
 	4)
-		Add_forwarding
-		;;
+	Add_forwarding
+	;;
 	5)
-		Del_forwarding
-		;;
+	Del_forwarding
+	;;
 	*)
-		echo "请输入正确数字 [0-5]"
-		;;
+	echo "请输入正确数字 [0-5]"
+	;;
 esac

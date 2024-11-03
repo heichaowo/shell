@@ -162,6 +162,45 @@ Add_forwarding(){
 	echo -e "转发类型	: ${Green_font_prefix}${forwarding_type}${Font_color_suffix}"
 	echo -e "——————————————————————————————————————————————————————————————————————\n"
 }
+View_forwarding(){
+	check_iptables
+	forwarding_text=$(iptables -t nat -vnL PREROUTING | tail -n +3)
+	[[ -z ${forwarding_text} ]] && echo -e "${Error} 没有发现 iptables 端口转发规则，请检查 !" && exit 1
+	forwarding_total=$(echo -e "${forwarding_text}" | wc -l)
+	forwarding_list_all=""
+	for ((integer = 1; integer <= ${forwarding_total}; integer++)); do
+		forwarding_type=$(echo -e "${forwarding_text}" | awk '{print $4}' | sed -n "${integer}p")
+		forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${integer}p" | awk -F "dpt:" '{print $2}')
+		[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${integer}p" | awk -F "dpts:" '{print $2}')
+		forwarding_fork=$(echo -e "${forwarding_text}" | awk '{print $12}' | sed -n "${integer}p" | awk -F "to:" '{print $2}')
+		forwarding_list_all=${forwarding_list_all}"${Green_font_prefix}"${integer}". ${Font_color_suffix} 类型: ${Green_font_prefix}"${forwarding_type}"${Font_color_suffix} 监听端口: ${Red_font_prefix}"${forwarding_listen}"${Font_color_suffix} 转发IP和端口: ${Red_font_prefix}"${forwarding_fork}"${Font_color_suffix}\n"
+	done
+	echo && echo -e "当前有 ${Green_background_prefix} "${forwarding_total}" ${Font_color_suffix} 个 iptables 端口转发规则。"
+	echo -e ${forwarding_list_all}
+}
+Del_forwarding(){
+	check_iptables
+	while true; do
+		View_forwarding
+		read -e -p "请输入数字 来选择要删除的 iptables 端口转发规则(默认回车取消):" Del_forwarding_num
+		[[ -z "${Del_forwarding_num}" ]] && Del_forwarding_num="0"
+		echo $((${Del_forwarding_num}+0)) &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			if [[ ${Del_forwarding_num} -ge 1 ]] && [[ ${Del_forwarding_num} -le ${forwarding_total} ]]; then
+				forwarding_type=$(echo -e "${forwarding_text}" | awk '{print $4}' | sed -n "${Del_forwarding_num}p")
+				forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${Del_forwarding_num}p" | awk -F "dpt:" '{print $2}' | sed 's/-/:/g')
+				[[ -z ${forwarding_listen} ]] && forwarding_listen=$(echo -e "${forwarding_text}" | awk '{print $11}' | sed -n "${Del_forwarding_num}p" | awk -F "dpts:" '{print $2}')
+				Del_iptables "${forwarding_type}" "${Del_forwarding_num}"
+				Save_iptables
+				echo && echo -e "${Info} iptables 端口转发规则删除完成 !" && echo
+			else
+				echo -e "${Error} 请输入正确的数字 !"
+			fi
+		else
+			break && echo "取消..."
+		fi
+	done
+}
 Save_iptables(){
 	if [[ ${release} == "centos" ]]; then
 		service iptables save

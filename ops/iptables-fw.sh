@@ -6,7 +6,7 @@ export PATH
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: iptables Port forwarding
 #	Version: 0.0.2
-#	Author: Yanglc
+#	Author: heichaowo
 #=================================================
 sh_ver="0.0.2"
 

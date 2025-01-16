@@ -46,6 +46,7 @@ systemctl restart rsyslog
 # 配置 iptables 规则记录 UDP 流量
 echo "Adding iptables rules to log UDP packets..."
 iptables -N LOGGING
+iptables -I INPUT 3 -p udp -m state --state NEW -j ACCEPT
 iptables -A INPUT -p udp -j LOGGING
 iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "UDP Packet: " --log-level 7
 iptables -A LOGGING -j DROP

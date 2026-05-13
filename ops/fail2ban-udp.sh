@@ -21,10 +21,10 @@ EOF
 # 配置 fail2ban jail.local 文件
 cat >> "$JAIL_LOCAL" << 'EOF'
 
-[udp-abuse]
+[udp]
 enabled  = true
-filter   = udp-abuse
-action   = iptables[name=UDP-abuse, port=any, protocol=udp]
+filter   = udp
+action   = iptables[name=udp, port=any, protocol=udp]
 logpath  = /var/log/iptables.log
 maxretry = 5
 bantime  = 3600

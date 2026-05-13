@@ -3,7 +3,7 @@
 # install iptables-persistent
 apt install iptables-persistent
 
-# Flush existing rules(include nat rules) and set default policies
+## Flush existing rules(include nat rules) and set default policies
 iptables -F
 iptables -X
 iptables -t nat -F

@@ -136,4 +136,92 @@ Set_Config(){
 	Set_local_port
 	Set_local_ip
 	Set_forwarding_type
-	echo && echo -e "——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+	echo && echo -e "——————————————————————————————————————————————————————————————————————"
+	read -e -p "请按任意键继续，如有配置错误请使用 Ctrl+C 退出。" var
+}
+Add_forwarding(){
+	check_iptables
+	Set_Config
+	local_port=$(echo ${local_port} | sed 's/-/:/g')
+	forwarding_port_1=$(echo ${forwarding_port} | sed 's/-/:/g')
+	if [[ ${forwarding_type} == "TCP" ]]; then
+		Add_iptables "tcp"
+	elif [[ ${forwarding_type} == "UDP" ]]; then
+		Add_iptables "udp"
+	elif [[ ${forwarding_type} == "TCP+UDP" ]]; then
+		Add_iptables "tcp"
+		Add_iptables "udp"
+	fi
+	Save_iptables
+	clear && echo && echo -e "——————————————————————————————————————————————————————————————————————"
+	echo -e "iptables 端口转发规则配置完成 !\n"
+	echo -e "本地监听端口    : ${Green_font_prefix}${local_port}${Font_color_suffix}"
+	echo -e "服务器 IP	: ${Green_font_prefix}${local_ip}${Font_color_suffix}\n"
+	echo -e "欲转发的端口    : ${Green_font_prefix}${forwarding_port_1}${Font_color_suffix}"
+	echo -e "欲转发 IP	: ${Green_font_prefix}${forwarding_ip}${Font_color_suffix}"
+	echo -e "转发类型	: ${Green_font_prefix}${forwarding_type}${Font_color_suffix}"
+	echo -e "——————————————————————————————————————————————————————————————————————\n"
+}
+Save_iptables(){
+	if [[ ${release} == "centos" ]]; then
+		service iptables save
+	else
+		iptables-save > /etc/iptables.up.rules
+	fi
+}
+Set_iptables(){
+	echo -e "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+	sysctl -p
+	if [[ ${release} == "centos" ]]; then
+		service iptables save
+		chkconfig --level 2345 iptables on
+	else
+		iptables-save > /etc/iptables.up.rules
+		echo -e '#!/bin/bash\n/sbin/iptables-restore < /etc/iptables.up.rules' > /etc/network/if-pre-up.d/iptables
+		chmod +x /etc/network/if-pre-up.d/iptables
+	fi
+}
+Update_Shell(){
+	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/heichaowo/shell/refs/heads/main/ops/iptables-fw.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/"//g'|head -1)
+	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
+	wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/refs/heads/main/ops/iptables-fw.sh" && chmod +x iptables-fw.sh
+	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
+}
+check_sys
+echo && echo -e " iptables 端口转发一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
+  -- Nya | community.nya.ae --
+  
+ ${Green_font_prefix}0.${Font_color_suffix} 升级脚本
+————————————
+ ${Green_font_prefix}1.${Font_color_suffix} 安装 iptables
+ ${Green_font_prefix}2.${Font_color_suffix} 清空 iptables 端口转发
+————————————
+ ${Green_font_prefix}3.${Font_color_suffix} 查看 iptables 端口转发
+ ${Green_font_prefix}4.${Font_color_suffix} 添加 iptables 端口转发
+ ${Green_font_prefix}5.${Font_color_suffix} 删除 iptables 端口转发
+————————————
+注意：初次使用前请请务必执行 ${Green_font_prefix}1. 安装 iptables${Font_color_suffix}(不仅仅是安装)" && echo
+read -e -p " 请输入数字 [0-5]:" num
+case "$num" in
+	0)
+		Update_Shell
+		;;
+	1)
+		install_iptables
+		;;
+	2)
+		Uninstall_forwarding
+		;;
+	3)
+		View_forwarding
+		;;
+	4)
+		Add_forwarding
+		;;
+	5)
+		Del_forwarding
+		;;
+	*)
+		echo "请输入正确数字 [0-5]"
+		;;
+esac

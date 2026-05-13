@@ -6,8 +6,8 @@ https://github.com/TinrLin/sing-box_-tutorial/tree/main/Hysteria2
 脚本并非完全复制来源，根据我自己的需求有小做修改，请注意看shell里的注释
 
 # 使用
-wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/firewall/firewall.sh" && chmod +x firewall.sh && ./firewall.sh
+wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/firewall/firewall.sh" && sudo chmod +x firewall.sh && sudo ./firewall.sh
 
-wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/firewall/adapt.sh" && chmod +x adapt.sh && ./adapt.sh
+wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/firewall/adapt.sh" && sudo chmod +x adapt.sh && sudo ./adapt.sh
 
-wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/iptables/iptables/iptables.sh" && chmod +x iptables.sh && ./iptables.sh
+wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/iptables/iptables/iptables.sh" && sudo chmod +x iptables.sh && sudo ./iptables.sh

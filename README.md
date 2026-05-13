@@ -10,4 +10,4 @@ wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shel
 
 wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/firewall/adapt.sh" && chmod +x adapt.sh && ./adapt.sh
 
-wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/iptables/iptables.sh" && chmod +x iptables.sh && ./iptables.sh
+wget -N --no-check-certificate "https://raw.githubusercontent.com/heichaowo/shell/main/iptables/iptables/iptables.sh" && chmod +x iptables.sh && ./iptables.sh

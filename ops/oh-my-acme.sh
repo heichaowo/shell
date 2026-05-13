@@ -63,11 +63,8 @@ else
     IPTABLES_RULE_ADDED=false
 fi
 
-# 设置自定义端口环境变量
-export ACME_HTTP01_PORT=$CUSTOM_PORT
-
-# 申请SSL证书
-$ACME_PATH/acme.sh --issue -d $DOMAIN -w $WEBROOT -k ec-256 --force --insecure --httpport $CUSTOM_PORT
+# 使用standalone模式申请SSL证书
+$ACME_PATH/acme.sh --issue -d $DOMAIN --standalone --httpport $CUSTOM_PORT -k ec-256 --force --insecure
 
 # 创建目标目录（如果不存在）
 if [ ! -d "$KEY_DIR" ]; then

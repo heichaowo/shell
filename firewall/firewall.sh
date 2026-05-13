@@ -14,17 +14,19 @@ iptables -A INPUT -i lo -j ACCEPT
 # Allow ICMP, SSH, HTTP, and HTTPS
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 7367 -j ACCEPT
+iptables -A INPUT -p tcp --dport 7366 -j ACCEPT
 iptables -A INPUT -p tcp --dport 10000 -j ACCEPT
+iptables -A INPUT -p udp --dport 10000:65535 -j ACCEPT
+iptables -A INPUT -p udp --dport 3478 -j ACCEPT
+iptables -A INPUT -p tcp --dport 12345 -j ACCEPT
 iptables -A INPUT -p tcp --dport 10443 -j ACCEPT
-
 # Allow UDP 443
-iptables -A INPUT -p udp --dport 443 -j ACCEPT
-
+iptables -A INPUT -p udp --dport 7367 -j ACCEPT
+iptables -A INPUT -p udp --dport 7366 -j ACCEPT
 # Allow related and established connections
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-
+iptables -P FORWARD ACCEPT
 # Deny other input
 iptables -P INPUT DROP
 

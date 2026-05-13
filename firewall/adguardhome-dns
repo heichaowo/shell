@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # DNS-over-TLS⁠ server
 iptables -A INPUT -p tcp --dport 853 -j ACCEPT
 

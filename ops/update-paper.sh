@@ -1,15 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
-# Set the download page URL
-url="https://papermc.io/downloads/paper"
+PROJECT="paper"
+MINECRAFT_VERSION="1.21.1"
 
-# Use curl to fetch the HTML and grep to extract the download link for the latest paper.jar
-download_link=$(curl -s $url | grep -oP '(?<=href=")[^"]*(?=">Download the latest Paper)')
+LATEST_BUILD=$(curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds | \
+    jq -r '.builds | map(select(.channel == "default") | .build) | .[-1]')
 
-# Combine the base URL with the extracted download path (if necessary)
-full_url="https://papermc.io$download_link"
+if [ "$LATEST_BUILD" != "null" ]; then
+    JAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${LATEST_BUILD}.jar
+    PAPERMC_URL="https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${LATEST_BUILD}/downloads/${JAR_NAME}"
 
-# Download the latest paper.jar to the specified directory
-curl -L $full_url -o /root/paper.jar
-
-echo "The latest version of paper.jar has been downloaded and stored in /root/"
+    # Download the latest Paper version
+    curl -o paper.jar $PAPERMC_URL
+    echo "Download completed"
+else
+    echo "No stable build for version $MINECRAFT_VERSION found :("
+fi

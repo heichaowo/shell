@@ -6,19 +6,15 @@ apt install iptables-persistent
 # Flush existing rules and set default policies
 iptables -F
 iptables -X
+iptables -t nat -F
 
 # Allow loopback traffic
 iptables -A INPUT -i lo -j ACCEPT
 
-# Allow SSH, HTTP, and HTTPS and Cloudflare HTTPS port
+# Allow SSH, HTTP, and HTTPS
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-iptables -A INPUT -p tcp --dport 2053 -j ACCEPT
-iptables -A INPUT -p tcp --dport 2083 -j ACCEPT
-iptables -A INPUT -p tcp --dport 2087 -j ACCEPT
-iptables -A INPUT -p tcp --dport 2096 -j ACCEPT
-iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
 
 # Allow UDP 443
 iptables -A INPUT -p udp --dport 443 -j ACCEPT

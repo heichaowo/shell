@@ -80,7 +80,6 @@ bash <(wget -qO- $BASE/motd.sh) MyServerName
 | `oh-my-acme.sh` | acme.sh 多域名 SSL 证书申请，支持主域名 + SAN |
 | `go-installer.sh` | Go 1.24.5 环境安装 |
 | `derper-build.sh` | 构建 Tailscale DERP 中继节点（依赖 Go） |
-| `update-xray.sh` | 自动获取 Xray-core 最新版并更新 |
 | `update-paper.sh` | 自动从 PaperMC API 获取最新构建并下载，支持传参指定版本，默认 1.21.1 |
 | `stop-goedge-update.sh` | 通过 hosts 文件屏蔽 GoEdge 自动更新域名 |
 
@@ -92,7 +91,6 @@ bash <(wget -qO- $BASE/nginx-stable.sh)
 bash <(wget -qO- $BASE/oh-my-acme.sh) example.com www.example.com
 bash <(wget -qO- $BASE/go-installer.sh)
 bash <(wget -qO- $BASE/derper-build.sh)
-bash <(wget -qO- $BASE/update-xray.sh)
 bash <(wget -qO- $BASE/update-paper.sh)           # 默认 1.21.1
 bash <(wget -qO- $BASE/update-paper.sh) 1.21.4    # 指定版本
 bash <(wget -qO- $BASE/stop-goedge-update.sh)

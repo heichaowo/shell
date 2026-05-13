@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 PROJECT="paper"
-MINECRAFT_VERSION="1.21.1"
+MINECRAFT_VERSION="${1:-1.21.1}"
 
 LATEST_BUILD=$(curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds | \
     jq -r '.builds | map(select(.channel == "default") | .build) | .[-1]')

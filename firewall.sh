@@ -6,8 +6,6 @@ apt install iptables-persistent
 # Flush existing rules and set default policies
 iptables -F
 iptables -X
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
 iptables -P OUTPUT ACCEPT
 
 # Allow loopback traffic
@@ -32,3 +30,4 @@ netfilter-persistent save
 
 # Output the rules
 iptables -L
+iptables -t nat -nL --line

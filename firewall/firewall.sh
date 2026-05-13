@@ -16,6 +16,7 @@ iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 5555 -j ACCEPT #Nezha
 
 # Allow UDP 443
 iptables -A INPUT -p udp --dport 443 -j ACCEPT

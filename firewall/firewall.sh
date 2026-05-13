@@ -16,14 +16,11 @@ iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
-iptables -A INPUT -p tcp --dport 9443 -j ACCEPT
 iptables -A INPUT -p tcp --dport 10000 -j ACCEPT
 iptables -A INPUT -p tcp --dport 10443 -j ACCEPT
 
 # Allow UDP 443
 iptables -A INPUT -p udp --dport 443 -j ACCEPT
-iptables -A INPUT -p udp --dport 8443 -j ACCEPT
 
 # Allow related and established connections
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
